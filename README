@@ -1,0 +1,41 @@
+AS3 Auto Marshaller
+===================
+*This library is not anywhere ready for production and is still under development!*
+
+A lightweight library which aims to automatically marshal a Plain Old ActionScript 3 object into a strongly typed Model.  Currently the Auto Marshaller supports the following rules for setting properties:
+
+* via public fields, ie: public var foo : int;
+* via implicit setters, ie: function set foo(value : int) : void;
+* via explicit setters, ie: function setFoo(value : int) : void;
+* via Metadata defined on your model object.
+
+The library also supports constructor injection.
+
+The main goal is to be as automagic as possible, if you stick to using simple VO's and can match up the property names, then marshalling is as straight forward as calling:
+
+`// The Plain Old AS3 Object you wish to convert to a Model (of type Clazz).
+const source : Object = { name: "Jonny", age: 28 };
+
+// Invoke the auto marshaller.
+const myClazz : Clazz = AutoMarshaller.marshall(source, Clazz);`
+
+And that's it!
+
+
+Defining Mapping Rules With Metadata
+------------------------------------
+When using Metadata, you simply annotate your setters, for example:
+
+`[Marshall(field="name")]
+public function setName(value : String) : void { _name = value; }`
+
+
+Defining Mapping Rules Without Metadata
+---------------------------------------
+If you don't want to use Metadata, you can simply define your marshalling rules via the MappingRulesBuilder, for example:
+
+`const mappingRules : MappingRules = new MappingRulesBuilder()
+    .mapSetter("name", "setName")
+    .build();
+    
+const myClazz : Clazz = AutoMarshaller.marshall(source, Clazz, mappingRules);`
