@@ -1,5 +1,6 @@
 package
 {
+	import org.osflash.automashaller.TestCoerceToVector;
 	import org.osflash.automashaller.outside.TestExtractMethod;
 	import flash.events.Event;
 	import flash.display.Stage;
@@ -33,7 +34,8 @@ package
 			
 			core.run([
 				TestAutoMarshaller,
-				TestExtractMethod
+				TestExtractMethod,
+				TestCoerceToVector
 			]);			
 		}
 	}

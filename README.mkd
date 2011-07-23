@@ -107,6 +107,29 @@ package app.model {
 ```
 
 
+Automatic Coercion
+------------------
+AutoMarshaller will automatically coerce Arrays found in your source object into Vectors defined in your target Model
+Class, take the following example:
+
+```actionscript
+// The Target Model Class Definition.
+class app.model {
+	public class ColourList {
+		public var colours : Vector.<String>;
+	}
+}
+
+var source : Object = { colours: [ "red", "white", "blue" ] };
+var result : ColourList = extract(source, ColourList); 
+
+trace(result.colours);	// "red","white","blue"
+trace(getQualifiedClassName(result.colours));	// __AS3__.vec::Vector.<String>
+```
+
+This is particularly useful when coming from a parsed JSON object which doesn't support Vectors.
+
+
 Dependencies
 ------------
 * `as3commons-reflect` is used for all reflection; In the future I may consider removing this dependency and move to

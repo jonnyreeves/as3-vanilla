@@ -10,6 +10,7 @@ package org.osflash.automashaller
 	import org.as3commons.reflect.Parameter;
 	import org.as3commons.reflect.Type;
 	import org.as3commons.reflect.Variable;
+	import flash.utils.getQualifiedClassName;
 	
 	/**
 	 * @author Jonny
@@ -78,18 +79,34 @@ package org.osflash.automashaller
 
 		private function extractValue(source : Object, injectionDetail : InjectionDetail) : *
 		{
-			const value : * = source[injectionDetail.name];
+			var value : * = source[injectionDetail.name];
 			
 			// Is this a required injection?
 			if (injectionDetail.isRequired && value === undefined) {
 				throw new MarshallingError("Required value " + injectionDetail + " does not exist in the source object.", MarshallingError.MISSING_REQUIRED_FIELD);
 			}
+			
+			if (value) 
+			{
+				if (value is Array && isVector(injectionDetail.type)) {
+					value = coerceToVector(value as Array, injectionDetail.type);
+				}
 				
-			// If we have a value then perform a typecheck.
-			if (value && !(value is injectionDetail.type)) {
-				throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail, MarshallingError.TYPE_MISMATCH);
+				if (!(value is injectionDetail.type)) {
+					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail, MarshallingError.TYPE_MISMATCH);
+				}
 			}
+			
 			return value;
+		}
+
+		private function coerceToVector(array : Array, targetVectorClass : Class) : *
+		{
+			const result : * = ClassUtils.newInstance(targetVectorClass);
+			for (var i : uint = 0; i < array.length; i++) {
+				result[i] = array[i];
+			}
+			return result;
 		}
 		
 
@@ -166,6 +183,11 @@ package org.osflash.automashaller
 				return accessor.access == AccessorAccess.READ_WRITE || accessor.access == AccessorAccess.WRITE_ONLY;
 			}
 			return false;
+		}
+		
+		private function isVector(obj : *) : Boolean 
+		{
+    		return (getQualifiedClassName(obj).indexOf('__AS3__.vec::Vector') == 0);
 		}
 	}
 }
