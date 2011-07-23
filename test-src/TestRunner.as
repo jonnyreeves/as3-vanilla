@@ -1,5 +1,6 @@
 package
 {
+	import org.osflash.automashaller.outside.TestExtractMethod;
 	import flash.events.Event;
 	import flash.display.Stage;
 	import org.flexunit.internals.TraceListener;
@@ -32,6 +33,7 @@ package
 			
 			core.run([
 				TestAutoMarshaller,
+				TestExtractMethod
 			]);			
 		}
 	}
