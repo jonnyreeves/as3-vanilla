@@ -26,7 +26,7 @@ Using the AutoMarshaller library, you can turn the above code into this:
 var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
 
 // Use the AutoMarshaller to convert it into a PersonVO.
-const myPerson : PersonVO = new AutoMarshaller().marshall(jsonObject, PersonVO);
+const myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
 
 trace(myPerson.name);  // "Jonny"
 ```

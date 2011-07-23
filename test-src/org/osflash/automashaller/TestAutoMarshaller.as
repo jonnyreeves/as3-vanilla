@@ -33,7 +33,7 @@ package org.osflash.automashaller
 		[Test]
 		public function withPublicFields() : void
 		{
-			const result : PersonPublicFields = _marshaller.marshall(SOURCE, PersonPublicFields);
+			const result : PersonPublicFields = _marshaller.extract(SOURCE, PersonPublicFields);
 			assertEquals(SOURCE["name"], result.name);
 			assertEquals(SOURCE["age"], result.age);
 			assertEquals(SOURCE["artists"], result.artists);
@@ -42,7 +42,7 @@ package org.osflash.automashaller
 		[Test]
 		public function withImplicitFields() : void
 		{
-			const result : PersonImplicitFields = _marshaller.marshall(SOURCE, PersonImplicitFields);
+			const result : PersonImplicitFields = _marshaller.extract(SOURCE, PersonImplicitFields);
 			assertEquals(SOURCE["name"], result.name);
 			assertEquals(SOURCE["age"], result.age);
 			assertEquals(SOURCE["artists"], result.artists);
@@ -53,7 +53,7 @@ package org.osflash.automashaller
 		public function missingFieldsUsingFieldInection() : void
 		{
 			const source : Object = { name: "dave" };
-			const result : PersonPublicFields = _marshaller.marshall(source, PersonPublicFields);
+			const result : PersonPublicFields = _marshaller.extract(source, PersonPublicFields);
 			assertEquals(source["name"], result.name);
 			assertEquals(0, result.age);
 			assertEquals(null, result.artists);
@@ -63,7 +63,7 @@ package org.osflash.automashaller
 		public function missingFieldsUsingMutatorInection() : void
 		{
 			const source : Object = { name: "dave" };
-			const result : PersonSetterMetadata = _marshaller.marshall(source, PersonSetterMetadata);
+			const result : PersonSetterMetadata = _marshaller.extract(source, PersonSetterMetadata);
 			assertEquals(source["name"], result.getName());
 			assertEquals(0, result.getAge());
 			assertEquals(null, result.getArtists());
@@ -73,7 +73,7 @@ package org.osflash.automashaller
 		public function missingFieldsUsingMultipleArgumentSetter() : void
 		{
 			const source : Object = { name: "dave" };
-			const result : PersonMutlipleArgumentSetterMetadata = _marshaller.marshall(source, PersonMutlipleArgumentSetterMetadata);
+			const result : PersonMutlipleArgumentSetterMetadata = _marshaller.extract(source, PersonMutlipleArgumentSetterMetadata);
 			assertEquals(source["name"], result.getName());
 			assertEquals(0, result.getAge());
 			assertEquals(null, result.getArtists());
@@ -83,7 +83,7 @@ package org.osflash.automashaller
 		public function withAdditionalFieldsInSource() : void
 		{
 			const source : Object = { name: "bob", age: 27, artists: [ "nin", "qotsa" ], gender: "m" };
-			const result : PersonPublicFields = _marshaller.marshall(source, PersonPublicFields);
+			const result : PersonPublicFields = _marshaller.extract(source, PersonPublicFields);
 			assertEquals(source["name"], result.name);
 			assertEquals(source["age"], result.age);
 			assertEquals(source["artists"], result.artists);
@@ -95,7 +95,7 @@ package org.osflash.automashaller
 			var errorThrown : Boolean;
 			try {
 				const source : Object = { name: "Jonny", age: "27" };
-				_marshaller.marshall(source, PersonPublicFields);
+				_marshaller.extract(source, PersonPublicFields);
 			}
 			catch (e : MarshallingError) {
 				errorThrown = true;
@@ -110,7 +110,7 @@ package org.osflash.automashaller
 			var errorThrown : Boolean;
 			try {
 				const source : Object = { name: "Jonny" };
-				_marshaller.marshall(source, PersonConstructorMetadata);
+				_marshaller.extract(source, PersonConstructorMetadata);
 			}
 			catch (e : MarshallingError) {
 				errorThrown = true;
@@ -123,7 +123,7 @@ package org.osflash.automashaller
 		[Test]
 		public function withMetadataDefinedConstructorArguments() : void
 		{
-			const result : PersonConstructorMetadata = _marshaller.marshall(SOURCE, PersonConstructorMetadata);
+			const result : PersonConstructorMetadata = _marshaller.extract(SOURCE, PersonConstructorMetadata);
 			assertEquals(SOURCE["name"], result.name);
 			assertEquals(SOURCE["age"], result.age);
 			assertEquals(SOURCE["artists"], result.artists);
@@ -133,7 +133,7 @@ package org.osflash.automashaller
 		[Test]
 		public function withMetadataDefinedSetters() : void
 		{
-			const result : PersonSetterMetadata = _marshaller.marshall(SOURCE, PersonSetterMetadata);
+			const result : PersonSetterMetadata = _marshaller.extract(SOURCE, PersonSetterMetadata);
 			assertEquals(SOURCE["name"], result.getName());
 			assertEquals(SOURCE["age"], result.getAge());
 			assertEquals(SOURCE["artists"], result.getArtists());
@@ -142,7 +142,7 @@ package org.osflash.automashaller
 		[Test]
 		public function withMetadataDefinedMultipleArgumentSetter() : void
 		{
-			const result : PersonMutlipleArgumentSetterMetadata = _marshaller.marshall(SOURCE, PersonMutlipleArgumentSetterMetadata);
+			const result : PersonMutlipleArgumentSetterMetadata = _marshaller.extract(SOURCE, PersonMutlipleArgumentSetterMetadata);
 			assertEquals(SOURCE["name"], result.getName());
 			assertEquals(SOURCE["age"], result.getAge());
 			assertEquals(SOURCE["artists"], result.getArtists());
@@ -151,8 +151,3 @@ package org.osflash.automashaller
 
 	}
 }
-
-
-
-
-

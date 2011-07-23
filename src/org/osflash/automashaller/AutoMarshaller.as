@@ -1,13 +1,13 @@
 package org.osflash.automashaller
 {
-	import org.as3commons.reflect.Method;
-	import org.as3commons.reflect.Parameter;
-	import org.as3commons.reflect.MetadataArgument;
 	import org.as3commons.lang.ClassUtils;
 	import org.as3commons.reflect.Accessor;
 	import org.as3commons.reflect.AccessorAccess;
 	import org.as3commons.reflect.Field;
 	import org.as3commons.reflect.Metadata;
+	import org.as3commons.reflect.MetadataArgument;
+	import org.as3commons.reflect.Method;
+	import org.as3commons.reflect.Parameter;
 	import org.as3commons.reflect.Type;
 	import org.as3commons.reflect.Variable;
 	
@@ -23,11 +23,13 @@ package org.osflash.automashaller
 		{
 		}
 		
-		public function marshall(source : Object, targetType : Class) : *
+		public function extract(source : Object, targetType : Class) : *
 		{
+			// Construct an InjectionMap which tells us how to inject fields from the source object into 
+			// the Target class.
 			const injectionMap : InjectionMap = new InjectionMap();
-			
 			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
+			
 			trace(injectionMap);
 
 			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
