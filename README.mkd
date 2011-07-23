@@ -26,7 +26,7 @@ Using the AutoMarshaller library, you can turn the above code into this:
 var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
 
 // Use the AutoMarshaller to convert it into a PersonVO.
-const myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
+var myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
 
 trace(myPerson.name);  // "Jonny"
 ```
@@ -35,7 +35,7 @@ Things get even easier when you make use of the `extract` convenience method:
 
 ```actionscript
 var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
-const myPerson : PersonVO = extract(jsonObject, PersonVO);
+var myPerson : PersonVO = extract(jsonObject, PersonVO);
 ```
 
 Although the AutoMarshaller library does make use of Metadata, it is by no means required - the goal of this library
@@ -99,7 +99,7 @@ package app.model {
 			_age = age;
 		}
 		
-		[Marshal(field="music")]
+		[Marshall(field="music")]
 		public function setMusic(value : Array) : void {
 			_music = value;
     }
@@ -107,10 +107,19 @@ package app.model {
 ```
 
 
+Dependencies
+------------
+* `as3commons-reflect` is used for all reflection; In the future I may consider removing this dependency and move to
+either a lighter reflection framework (as3commons-reflect has two dependencies of its own) or rolling my own so as
+to produce a single SWC.
+
+
 Future Features / Wish List
 ---------------------------
-* Java style mutators (eg: `setFoo()`) could be mapped automatically.
 * The user should be able to define mapping rules without having to use Metadata.
+* Marshalling nested Objects automatically.
+* Caching of the InjectionMap (assuming Class definitions won't change at run time).
+* Java style mutators (eg: `setFoo()`) could be mapped automatically.
 * By using `as3commons-bytecode` we could perform ByteCode reflection to retrieve the names of parameters; this would 
 would remove the need for constructor marshalling metadata.
  
