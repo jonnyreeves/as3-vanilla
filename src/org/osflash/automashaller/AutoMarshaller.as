@@ -1,119 +1,169 @@
 package org.osflash.automashaller
 {
-	import org.osflash.automashaller.mappingrules.MappingRule;
 	import org.as3commons.reflect.Method;
-	import org.osflash.automashaller.mappingrules.SetterMappingRule;
-	import org.as3commons.reflect.MetadataContainer;
+	import org.as3commons.reflect.Parameter;
+	import org.as3commons.reflect.MetadataArgument;
+	import org.as3commons.lang.ClassUtils;
+	import org.as3commons.reflect.Accessor;
+	import org.as3commons.reflect.AccessorAccess;
+	import org.as3commons.reflect.Field;
 	import org.as3commons.reflect.Metadata;
 	import org.as3commons.reflect.Type;
-	import org.as3commons.lang.ClassUtils;
+	import org.as3commons.reflect.Variable;
 	
 	/**
 	 * @author Jonny
 	 */
 	public class AutoMarshaller
 	{
-		public static function marshall(source : Object, targetClazz : Class, mappingRules : MappingRules = null) : *
+		private static const METADATA_TAG : String = "Marshall";
+		private static const METADATA_FIELD_KEY : String = "field";
+		
+		public function AutoMarshaller() 
 		{
-			mappingRules ||= MappingRules.AUTO;
+		}
+		
+		public function marshall(source : Object, targetType : Class) : *
+		{
+			const injectionMap : InjectionMap = new InjectionMap();
 			
-			const constructorArgs : Array = fetchContstructorArgs(mappingRules.constructorFields, source);
-			const instance : Object = ClassUtils.newInstance(targetClazz, constructorArgs);
+			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
+			trace(injectionMap);
+
+			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
+			injectFields(source, target, injectionMap);
+			injectMethods(source, target, injectionMap);
 			
-			const remainingFields : Array = fetchRemainingFieldNames(mappingRules.constructorFields, source);
-			const numRemainingFields : uint = remainingFields.length;
-			
-			const marshallingMetadataMap : Object = fetchMetdataMarshallingRulesMap(targetClazz);
-			
-			for (var i : uint = 0; i < numRemainingFields; i++)
-			{
-				const fieldName : String = remainingFields[i];
-				
-				if (marshallingMetadataMap[fieldName]) {
-					(marshallingMetadataMap[fieldName] as MappingRule).apply(fieldName, source, instance);
-				}
-				else {
-					mappingRules.getRule(fieldName).apply(fieldName, source, instance);
-				}
-			}
-			
-			return instance;
+			return target;
 		}
 
-		private static function fetchMetdataMarshallingRulesMap(targetClazz : Class) : Object
+
+
+		private function fetchConstructorArgs(source : Object, constructorFields : Array) : Array
 		{
-			const result : Object = {};
-			const containers : Array = Type.forClass(targetClazz).getMetadataContainers("Marshall");
-			
-			if (containers == null) {
-				return result;
+			const result : Array = [];
+			for (var i : uint = 0; i < constructorFields.length; i++) 
+			{
+				result.push(extractValue(source, constructorFields[i]));
+			}
+			return result;
+		}
+
+		private function injectFields(source : Object, target : *, injectionMap : InjectionMap) : void
+		{
+			for each (var injectionDetail : InjectionDetail in injectionMap.getFields())
+			{
+				target[injectionDetail.name] = extractValue(source, injectionDetail);
 			}
 			
-			const numContainers : uint = containers.length;
-
-			for (var i : uint = 0; i < numContainers; i++)
+		}
+		
+		private function injectMethods(source : Object, target : *, injectionMap : InjectionMap) : void
+		{
+			const methodNames : Array = injectionMap.getMethodsNames();
+			for each (var methodName : String in methodNames)
 			{
-				const container : MetadataContainer = containers[i];
-				if (container is Method) 
+				const values : Array = [];
+				for each (var injectionDetail : InjectionDetail in injectionMap.getMethod(methodName))
 				{
-					const fieldName : String = extractMappingMetadataFieldNameFromMethod(container as Method);
-					result[fieldName] = new SetterMappingRule((container as Method).name);
+					values.push(extractValue(source, injectionDetail));
 				}
+				
+				trace("Applying values: " + values + " to method: " + methodName);
+				(target[methodName] as Function).apply(null, values);
 			}
-
-			return result;
 		}
 
-		private static function extractMappingMetadataFieldNameFromMethod(method : Method) : String
+		private function extractValue(source : Object, injectionDetail : InjectionDetail) : *
 		{
-			const numMetadata : uint = method.metadata.length;
-			for (var i : uint = 0; i < numMetadata; i++) 
-			{
-				const metadata : Metadata = method.metadata[i];
-				if (metadata.name == "Marshall" && metadata.getArgument("field")) {
-					return metadata.getArgument("field").value;
-				}
+			const value : * = source[injectionDetail.name];
+			
+			// Is this a required injection?
+			if (injectionDetail.isRequired && value === undefined) {
+				throw new MarshallingError("Required value " + injectionDetail + " does not exist in the source object.", MarshallingError.MISSING_REQUIRED_FIELD);
 			}
-			return null;
+				
+			// If we have a value then perform a typecheck.
+			if (value && !(value is injectionDetail.type)) {
+				throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail, MarshallingError.TYPE_MISMATCH);
+			}
+			return value;
 		}
+		
 
-		private static function fetchRemainingFieldNames(constructorFields : Array, source : Object) : Array
+		private function instantiate(targetType : Class, ctorArgs : Array) : *
 		{
-			const constructorFieldSet : Object = {};
-			const result : Array = [];
-			const numConstructorFields : uint = constructorFields.length;
-			
-			// Array => Set for lookup.
-			for (var i : uint = 0; i < numConstructorFields; i++) {
-				constructorFieldSet[constructorFields[i]] = true;
-			}
-			
-			var j : uint = 0;
-			for (var fieldName : String in source) {
-				if (constructorFieldSet[fieldName] === undefined) {
-					result[j] = fieldName;
-					j++;
-				}
-			}
-			
-			return result;
+			return ClassUtils.newInstance(targetType, ctorArgs);
 		}
 
-		private static function fetchContstructorArgs(fieldNames : Array, source : Object) : Array
+		private function addReflectedRules(injectionMap : InjectionMap, targetType : Class, reflectionMap : Type) : void
 		{
-			const result : Array = [];
-			const numFields : uint = fieldNames.length;
-			
-			for (var i : uint = 0; i < numFields; i++)
-			{
-				const fieldName : String = fieldNames[i];
-				if (fieldName in source) {
-					result[i] = source[fieldName];
-				}
-			}
-			
-			return result;
+			addReflectedConstructorRules(injectionMap, reflectionMap);
+			addReflectedFieldRules(injectionMap, reflectionMap.fields);
+			addReflectedSetterRules(injectionMap, reflectionMap.methods);
 		}
 
+		private function addReflectedConstructorRules(injectionMap : InjectionMap, reflectionMap : Type) : void
+		{
+			const clazzMarshallingMetadata : Array = reflectionMap.getMetadata(METADATA_TAG);
+			if (!clazzMarshallingMetadata) {
+				return;
+			}
+			
+			const marshallingMetadata : Metadata = clazzMarshallingMetadata[0];
+			const numArgs : uint = marshallingMetadata.arguments.length;
+			
+			for (var i : uint = 0; i < numArgs; i++) {
+				var argument : MetadataArgument = marshallingMetadata.arguments[i];
+				if (argument.key == METADATA_FIELD_KEY) {
+					const param : Parameter = reflectionMap.constructor.parameters[i];
+					injectionMap.addConstructorField(new InjectionDetail(argument.value, param.type.clazz, true));
+				}
+			}
+		}
+
+		private function addReflectedFieldRules(injectionMap : InjectionMap, fields : Array) : void
+		{
+			for each (var field : Field in fields) {
+				if (canAccess(field)) {
+					injectionMap.addField(new InjectionDetail(field.name, field.type.clazz, false));
+				}
+			}
+		}
+
+		private function addReflectedSetterRules(injectionMap : InjectionMap, methods : Array) : void
+		{
+			for each (var method : Method in methods) {
+
+				const methodMarshallingMetadata : Array = method.getMetadata(METADATA_TAG);
+				if (methodMarshallingMetadata == null) {
+					continue;
+				}
+				
+				const metadata : Metadata = methodMarshallingMetadata[0];
+				const numArgs : uint = metadata.arguments.length;
+				
+				for (var i : uint = 0; i < numArgs; i++) {
+					var argument : MetadataArgument = metadata.arguments[i];
+					if (argument.key == METADATA_FIELD_KEY) {
+						const param : Parameter = method.parameters[i];
+						injectionMap.addMethod(method.name, new InjectionDetail(argument.value, param.type.clazz, false));
+					}
+				}
+			}
+		}		
+		
+
+		private function canAccess(field : Field) : Boolean
+		{
+			if (field is Variable) {
+				return true;
+			}
+			else if (field is Accessor) {
+				const accessor : Accessor = field as Accessor;
+				return accessor.access == AccessorAccess.READ_WRITE || accessor.access == AccessorAccess.WRITE_ONLY;
+			}
+			return false;
+		}
 	}
 }

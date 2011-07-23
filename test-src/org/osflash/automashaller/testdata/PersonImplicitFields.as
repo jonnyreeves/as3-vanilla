@@ -1,5 +1,9 @@
 package org.osflash.automashaller.testdata
 {
+	/**
+	 * Implicit setter can be used without additional mapping rules as long as the setter's name maps to the field 
+	 * name in the source object.
+	 */
 	public class PersonImplicitFields 
 	{
 		private var _name : String;

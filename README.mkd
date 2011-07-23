@@ -2,40 +2,108 @@ AS3 Auto Marshaller
 ===================
 *This library is not anywhere ready for production and is still under development!*
 
-A lightweight library which aims to automatically marshal a Plain Old ActionScript 3 object into a strongly typed Model.  Currently the Auto Marshaller supports the following rules for setting properties:
+A lightweight library which aims to automatically marshal a Plain Old ActionScript 3 object into a strongly typed Model.  
+An example use case would be turning data returned from a JSON endpoint into a Model, if you've ever written the 
+following code, then you can benefit from this library.
 
-* via public fields, ie: public var foo : int;
-* via implicit setters, ie: function set foo(value : int) : void;
-* via explicit setters, ie: function setFoo(value : int) : void;
-* via Metadata defined on your model object.
+```actionscript
+// Use a JSON library to convert a JSON String into an AS3 Object.
+var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
 
-The library also supports constructor injection.
+// Copy all the data into a new PersonVO so the rest of the system can use it.
+var myPerson : PersonVO = new PersonVO();
+myPerson.name = jsonObject["name"];
+myPerson.age = jsonObject["age"];
+myPerson.music = jsonObject["music"];
 
-The main goal is to be as automagic as possible, if you stick to using simple VO's and can match up the property names, then marshalling is as straight forward as calling:
+trace(myPerson.name) // Jonny.
+```
 
-`// The Plain Old AS3 Object you wish to convert to a Model (of type Clazz).
-const source : Object = { name: "Jonny", age: 28 };
+Using the AutoMarshaller library, you can turn the above code into this:
 
-// Invoke the auto marshaller.
-const myClazz : Clazz = AutoMarshaller.marshall(source, Clazz);`
+```actionscript
+// Use a JSON library to convert a JSON String into an AS3 Object.
+var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
 
-And that's it!
+// Use the AutoMarshaller to convert it into a PersonVO.
+const myPerson : PersonVO = new AutoMarshaller().marshall(jsonObject, PersonVO);
+
+trace(myPerson.name);  // "Jonny"
+```
+
+Although the AutoMarshaller library does make use of Metadata, it is by no means required - the goal of this library
+is to make the marshalling as transparent and painless as possible; if the source Object's fields maps perfectly to
+the fields of your Model object (as in the example above) then everything should 'just work'(tm).
 
 
-Defining Mapping Rules With Metadata
-------------------------------------
-When using Metadata, you simply annotate your setters, for example:
+Mapping Fields
+--------------
+Sometimes the fields on your Model object don't quite match up to the fields in your source object; not a problem, 
+you can use Metadata to define the mappings in your Model object:
 
-`[Marshall(field="name")]
-public function setName(value : String) : void { _name = value; }`
+```actionscript
+package app.model {
+	public class PersonVO {
+		public var name : String;
+		public var age : uint;
+		[Marshall(field="music")] public var musicTastes : Array;
+	}
+}
+```
 
 
-Defining Mapping Rules Without Metadata
----------------------------------------
-If you don't want to use Metadata, you can simply define your marshalling rules via the MappingRulesBuilder, for example:
+Mapping to Constructor Arguments
+--------------------------------
+If you're a fan of immutable models then you will want to define some Metadata to map the fields in your source object
+to the constructor arguments of your Model object:
 
-`const mappingRules : MappingRules = new MappingRulesBuilder()
-    .mapSetter("name", "setName")
-    .build();
-    
-const myClazz : Clazz = AutoMarshaller.marshall(source, Clazz, mappingRules);`
+```actionscript
+package app.model {
+	[Marshall(field="name", field="age", field="music")]
+	public class PersonModel {
+		private var _name : String;
+		private var _age : uint;
+		private var _musicTastes : Array;
+	
+    	public function PersonModel(name, age, music : Array) {
+    		_name = name;
+    		_age = age;
+    		_music = music;
+    	}
+    }
+}
+```
+
+
+Mapping to Methods / Mutators
+-----------------------------
+You can map the fields of your source object to a setter method in your Model object:
+
+```actionscript
+package app.model {
+	public class PersonModel {
+		private var _name : String;
+		private var _age : uint;
+		private var _music : Array;
+		
+		[Marshall(field="name", field="age")]
+		public function init(name : String, age : uint) : void {
+			_name = name;
+			_age = age;
+		}
+		
+		[Marshal(field="music")]
+		public function setMusic(value : Array) : void {
+			_music = value;
+    }
+}
+```
+
+
+Future Features / Wish List
+---------------------------
+* Java style mutators (eg: `setFoo()`) could be mapped automatically.
+* The user should be able to define mapping rules without having to use Metadata.
+* By using `as3commons-bytecode` we could perform ByteCode reflection to retrieve the names of parameters; this would 
+would remove the need for constructor marshalling metadata.
+ 
