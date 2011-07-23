@@ -31,7 +31,8 @@ const myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
 trace(myPerson.name);  // "Jonny"
 ```
 
-Things get even eaiser when you make use of the `extract` convenience method:
+Things get even easier when you make use of the `extract` convenience method:
+
 ```actionscript
 var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
 const myPerson : PersonVO = extract(jsonObject, PersonVO);
