@@ -38,10 +38,31 @@ var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin
 var myPerson : PersonVO = extract(jsonObject, PersonVO);
 ```
 
+Got a complex object graph?  Well that's where AutoMarshaller really shines, making light work of parsing and 
+marshalling nested objects, for example:
+
+```actionscript
+// The PersonVO Model contains an 'address' field which is a complex datatype (AddressVO).
+package app.model {
+	class PersonVO {
+		public var name : String;
+		public var address : AddressVO;
+	}
+}
+
+// Here's the class definition for AddressVO.
+package app.model {
+	class AddressVO {
+		public var line1 : String;
+		public var line2 : String;
+		public var city : String;
+	}
+}
+```
+
 Although the AutoMarshaller library does make use of Metadata, it is by no means required - the goal of this library
 is to make the marshalling as transparent and painless as possible; if the source Object's fields maps perfectly to
 the fields of your Model object (as in the example above) then everything should 'just work'(tm).
-
 
 Mapping Fields
 --------------
