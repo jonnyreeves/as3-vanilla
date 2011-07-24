@@ -1,12 +1,15 @@
 package org.osflash.automashaller
 {
+	import org.osflash.automashaller.testdata.PersonWithAddressConstructor;
 	import org.flexunit.asserts.assertEquals;
+	import org.flexunit.asserts.assertNotNull;
 	import org.flexunit.asserts.assertTrue;
 	import org.osflash.automashaller.testdata.PersonConstructorMetadata;
 	import org.osflash.automashaller.testdata.PersonImplicitFields;
 	import org.osflash.automashaller.testdata.PersonMutlipleArgumentSetterMetadata;
 	import org.osflash.automashaller.testdata.PersonPublicFields;
 	import org.osflash.automashaller.testdata.PersonSetterMetadata;
+	import org.osflash.automashaller.testdata.PersonWithAddressFields;
 	
 	/**
 	 * @author Jonny
@@ -148,6 +151,40 @@ package org.osflash.automashaller
 			assertEquals(SOURCE["artists"], result.getArtists());
 		}
 		
+		[Test]
+		public function withNestedObjectFields() : void
+		{
+			const source : Object = {
+				name: "Jonny",
+				address: {
+					address1: "My House",
+					city: "London"
+				}
+			};
+			
+			const result : PersonWithAddressFields = _marshaller.extract(source, PersonWithAddressFields);
+			assertEquals(source["name"], result.name);
+			assertNotNull(result.address);
+			assertEquals(source["address"]["address1"], result.address.address1);
+			assertEquals(source["address"]["city"], result.address.city); 
+		}
 
+		[Test]
+		public function withNestedObjectConstructorMetadata() : void
+		{
+			const source : Object = {
+				name: "Jonny",
+				address: {
+					address1: "My House",
+					city: "London"
+				}
+			};
+			
+			const result : PersonWithAddressConstructor = _marshaller.extract(source, PersonWithAddressConstructor);
+			assertEquals(source["name"], result.name);
+			assertNotNull(result.address);
+			assertEquals(source["address"]["address1"], result.address.address1);
+			assertEquals(source["address"]["city"], result.address.city); 
+		}
 	}
 }

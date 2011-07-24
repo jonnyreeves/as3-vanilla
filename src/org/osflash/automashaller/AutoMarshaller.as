@@ -1,5 +1,6 @@
 package org.osflash.automashaller
 {
+	import org.as3commons.lang.ObjectUtils;
 	import org.as3commons.lang.ClassUtils;
 	import org.as3commons.reflect.Accessor;
 	import org.as3commons.reflect.AccessorAccess;
@@ -88,10 +89,15 @@ package org.osflash.automashaller
 			
 			if (value) 
 			{
-				if (value is Array && isVector(injectionDetail.type)) {
+				// automatically coerce types.
+				if (!ObjectUtils.isSimple(value)) {
+					value = extract(value, injectionDetail.type);
+				}
+				else if (value is Array && isVector(injectionDetail.type)) {
 					value = coerceToVector(value as Array, injectionDetail.type);
 				}
 				
+				// refuse to allow any automatic coercing to occur.
 				if (!(value is injectionDetail.type)) {
 					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail, MarshallingError.TYPE_MISMATCH);
 				}
