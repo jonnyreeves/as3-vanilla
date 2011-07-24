@@ -58,6 +58,11 @@ package app.model {
 		public var city : String;
 	}
 }
+
+var jsonObject : Object = JSON.decode('{"name":"Jonny","address":{"line1":"My House","line2":"My Road","city":"London"}}');
+var myPerson : PersonVO = extract(jsonObject, PersonVO);
+
+trace(myPerson.address.city);	// "London"
 ```
 
 Although the AutoMarshaller library does make use of Metadata, it is by no means required - the goal of this library
