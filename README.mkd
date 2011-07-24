@@ -8,7 +8,7 @@ following code, then you can benefit from this library.
 
 ```actionscript
 // Use a JSON library to convert a JSON String into an AS3 Object.
-var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
+var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin","mew"]}');
 
 // Copy all the data into a new PersonVO so the rest of the system can use it.
 var myPerson : PersonVO = new PersonVO();
@@ -23,7 +23,7 @@ Using the AutoMarshaller library, you can turn the above code into this:
 
 ```actionscript
 // Use a JSON library to convert a JSON String into an AS3 Object.
-var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
+var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin","mew"]}');
 
 // Use the AutoMarshaller to convert it into a PersonVO.
 var myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
@@ -34,7 +34,7 @@ trace(myPerson.name);  // "Jonny"
 Things get even easier when you make use of the `extract` convenience method:
 
 ```actionscript
-var jsonObject : Object = JSON.decode({"name":"Jonny", "age": 28, "music":["nin","mew"]});
+var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin","mew"]}');
 var myPerson : PersonVO = extract(jsonObject, PersonVO);
 ```
 
