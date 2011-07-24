@@ -1,5 +1,6 @@
 package org.osflash.automashaller
 {
+	import org.osflash.automashaller.testdata.PersonWithMultipleAddressesVectorField;
 	import org.osflash.automashaller.testdata.PersonWithAddressConstructor;
 	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertNotNull;
@@ -185,6 +186,32 @@ package org.osflash.automashaller
 			assertNotNull(result.address);
 			assertEquals(source["address"]["address1"], result.address.address1);
 			assertEquals(source["address"]["city"], result.address.city); 
+		}
+		
+		[Test]
+		public function withNestedVector() : void
+		{
+			const source : Object = {
+				name: "Jonny",
+				addresses: [
+					{
+						address1: "Address 1",
+						city: "City 1"
+					},
+					{
+						address1: "Address 2",
+						city: "City 2"
+					}
+				]
+			};
+			
+			const result : PersonWithMultipleAddressesVectorField = _marshaller.extract(source, PersonWithMultipleAddressesVectorField);
+			assertNotNull(result.addresses);
+			assertEquals(2, result.addresses.length);
+			assertEquals(source["addresses"][0]["address1"], result.addresses[0].address1);
+			assertEquals(source["addresses"][0]["city"], result.addresses[0].city);
+			assertEquals(source["addresses"][1]["address1"], result.addresses[1].address1);
+			assertEquals(source["addresses"][1]["city"], result.addresses[1].city);
 		}
 	}
 }

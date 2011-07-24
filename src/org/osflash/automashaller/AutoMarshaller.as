@@ -94,7 +94,7 @@ package org.osflash.automashaller
 					value = extract(value, injectionDetail.type);
 				}
 				else if (value is Array && isVector(injectionDetail.type)) {
-					value = coerceToVector(value as Array, injectionDetail.type);
+					value = coerceToVector(value as Array, injectionDetail.type, injectionDetail.arrayTypeHint);
 				}
 				
 				// refuse to allow any automatic coercing to occur.
@@ -106,11 +106,11 @@ package org.osflash.automashaller
 			return value;
 		}
 
-		private function coerceToVector(array : Array, targetVectorClass : Class) : *
+		private function coerceToVector(array : Array, targetVectorClass : Class, targetClassType : Class) : *
 		{
 			const result : * = ClassUtils.newInstance(targetVectorClass);
 			for (var i : uint = 0; i < array.length; i++) {
-				result[i] = array[i];
+				result[i] = extract(array[i], targetClassType);
 			}
 			return result;
 		}
@@ -142,7 +142,8 @@ package org.osflash.automashaller
 				var argument : MetadataArgument = marshallingMetadata.arguments[i];
 				if (argument.key == METADATA_FIELD_KEY) {
 					const param : Parameter = reflectionMap.constructor.parameters[i];
-					injectionMap.addConstructorField(new InjectionDetail(argument.value, param.type.clazz, true));
+					const arrayTypeHint : Class = extractArrayTypeHint(param.type);
+					injectionMap.addConstructorField(new InjectionDetail(argument.value, param.type.clazz, true, arrayTypeHint));
 				}
 			}
 		}
@@ -151,7 +152,8 @@ package org.osflash.automashaller
 		{
 			for each (var field : Field in fields) {
 				if (canAccess(field)) {
-					injectionMap.addField(new InjectionDetail(field.name, field.type.clazz, false));
+					const arrayTypeHint : Class = extractArrayTypeHint(field.type);
+					injectionMap.addField(new InjectionDetail(field.name, field.type.clazz, false, arrayTypeHint));
 				}
 			}
 		}
@@ -172,12 +174,20 @@ package org.osflash.automashaller
 					var argument : MetadataArgument = metadata.arguments[i];
 					if (argument.key == METADATA_FIELD_KEY) {
 						const param : Parameter = method.parameters[i];
-						injectionMap.addMethod(method.name, new InjectionDetail(argument.value, param.type.clazz, false));
+						const arrayTypeHint : Class = extractArrayTypeHint(param.type);
+						injectionMap.addMethod(method.name, new InjectionDetail(argument.value, param.type.clazz, false, arrayTypeHint));
 					}
 				}
 			}
 		}		
-		
+
+		private function extractArrayTypeHint(type : Type) : Class
+		{
+			if (type.parameters && type.parameters[0] is Class) {
+				return type.parameters[0];
+			}
+			return null;
+		}		
 
 		private function canAccess(field : Field) : Boolean
 		{
@@ -185,8 +195,7 @@ package org.osflash.automashaller
 				return true;
 			}
 			else if (field is Accessor) {
-				const accessor : Accessor = field as Accessor;
-				return accessor.access == AccessorAccess.READ_WRITE || accessor.access == AccessorAccess.WRITE_ONLY;
+				return (field as Accessor).writeable;
 			}
 			return false;
 		}

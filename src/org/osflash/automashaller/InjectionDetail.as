@@ -8,11 +8,13 @@ package org.osflash.automashaller
 		private var _fieldName : String;
 		private var _type : Class;
 		private var _required : Boolean;
+		private var _arrayTypeHint : Class;
 		
-		public function InjectionDetail(fieldName : String, type : Class, required : Boolean) {
+		public function InjectionDetail(fieldName : String, type : Class, required : Boolean, arrayTypeHint : Class) {
 			_fieldName = fieldName;
 			_type = type;
 			_required = required;
+			_arrayTypeHint = arrayTypeHint;
 		}
 		
 		public function get name() : String {
@@ -28,10 +30,15 @@ package org.osflash.automashaller
 		{
 			return _required;
 		}
-		
+
 		public function toString() : String
 		{
 			return _fieldName + "<" + type + ">";
+		}
+
+		public function get arrayTypeHint() : Class
+		{
+			return _arrayTypeHint;
 		}
 	}
 }
