@@ -1,10 +1,7 @@
-AS3 Auto Marshaller
-===================
-*This library is not anywhere ready for production and is still under development!*
+AS3 Vanilla
+===========
 
-A lightweight library which aims to automatically marshal a Plain Old ActionScript 3 object into a strongly typed Model.  
-An example use case would be turning data returned from a JSON endpoint into a Model, if you've ever written the 
-following code, then you can benefit from this library.
+A lightweight library which enables a developer to extract a strongly typed Model Object from a untyped dynamic object without having to write a single line of parsing or marshalling code.  An example use case would be turning data returned from a JSON endpoint into a Model, if you've ever written the following code, then you can benefit from this library:
 
 ```actionscript
 // Use a JSON library to convert a JSON String into an AS3 Object.
