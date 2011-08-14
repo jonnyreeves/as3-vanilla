@@ -177,8 +177,6 @@ package org.osflash.vanilla
 					const arrayTypeHint : Class = extractArrayTypeHint(field.type, fieldMetadata);
 					const sourceFieldName : String = extractFieldName(field, fieldMetadata);
 					
-					trace("Mapping " + field.name + " => " + sourceFieldName + " on the source object");
-					
 					injectionMap.addField(field.name, new InjectionDetail(sourceFieldName, field.type.clazz, false, arrayTypeHint));
 				}
 			}

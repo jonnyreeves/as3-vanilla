@@ -48,4 +48,16 @@
 
 		<fail if="tests.failed" />
 	</target>
+	
+	<target name="package" depends="test" description="Package the project for distribution">
+		<delete dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}" />
+		
+		<zip destfile="${dist.dir}/${project.versionedname}.zip">
+			<zipfileset dir="${bin.dir}" includes="${project.versionedname}.swc" prefix="bin" />
+			<zipfileset dir="${lib.dir}" excludes="flexunit*" prefix="libs" />
+			<zipfileset dir="${basedir}" includes="README.mkd" />
+		</zip>
+	</target>
+	
 </project>
