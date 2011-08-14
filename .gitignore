@@ -1,5 +1,3 @@
 bin
-script
 .project
 .settings
-libs/**/flexunit*.swc
