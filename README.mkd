@@ -161,6 +161,7 @@ Dependencies
 ------------
 `as3commons-reflect` is used for all reflection; in order to use as3-vanilla you will need to download and add
 the following SWCs to your project's libs folder.
+
 * [ascommons-reflect-1.4.1](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-reflect/1.4.1/as3commons-reflect-1.4.1.swc)
 * [as3commons-lang-0.3.4](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-lang/0.3.4/as3commons-lang-0.3.4.swc)
 * [as3commons-logging-2.0](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-logging/2.0/as3commons-logging-2.0.swc)
