@@ -44,7 +44,7 @@ package org.osflash.vanilla
 			const injectionMap : InjectionMap = new InjectionMap();
 			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
 			
-			// Create a new isntance of the targetType; and then inject the values from the source object into it.
+			// Create a new isntance of the targetType; and then inject the values from the source object into it
 			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
 			injectFields(source, target, injectionMap);
 			injectMethods(source, target, injectionMap);
