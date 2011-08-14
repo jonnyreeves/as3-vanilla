@@ -110,7 +110,7 @@ package org.osflash.vanilla
 				
 				// refuse to allow any automatic coercing to occur.
 				if (!(value is injectionDetail.type)) {
-					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail, MarshallingError.TYPE_MISMATCH);
+					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail.type + " on target object", MarshallingError.TYPE_MISMATCH);
 				}
 			}
 			
