@@ -69,6 +69,7 @@ Although Vanilla library does make use of Metadata, it is by no means required -
 is to make the marshalling as transparent and painless as possible; if the source Object's fields maps perfectly to
 the fields of your Model object (as in the example above) then everything should 'just work'(tm).
 
+
 Mapping Fields
 --------------
 Sometimes the fields on your Model object don't quite match up to the fields in your source object; not a problem, 
@@ -158,9 +159,11 @@ This is particularly useful when coming from a parsed JSON object which doesn't 
 
 Dependencies
 ------------
-* `as3commons-reflect` is used for all reflection; In the future I may consider removing this dependency and move to
-either a lighter reflection framework (as3commons-reflect has two dependencies of its own) or rolling my own so as
-to produce a single SWC.
+`as3commons-reflect` is used for all reflection; in order to use as3-vanilla you will need to download and add
+the following SWCs to your project's libs folder.
+* [ascommons-reflect-1.4.1](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-reflect/1.4.1/as3commons-reflect-1.4.1.swc)
+* [as3commons-lang-0.3.4](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-lang/0.3.4/as3commons-lang-0.3.4.swc)
+* [as3commons-logging-2.0](http://projects.yoolab.org/maven/content/repositories/releases/org/as3commons/as3commons-logging/2.0/as3commons-logging-2.0.swc)
 
 
 Future Features / Wish List
@@ -170,4 +173,4 @@ Future Features / Wish List
 * Java style mutators (eg: `setFoo()`) could be mapped automatically.
 * By using `as3commons-bytecode` we could perform ByteCode reflection to retrieve the names of parameters; this would 
 would remove the need for constructor marshalling metadata.
- 
+* Possibly move away from as3commons-reflect (It has too many dependencies).
