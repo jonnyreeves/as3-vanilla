@@ -3,4 +3,4 @@ bin
 .settings
 
 # User should generate their own copy.
-build.properties
+user.properties

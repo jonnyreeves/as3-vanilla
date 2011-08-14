@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="as3-vanilla">
 
-	<!-- Load properties; if this fails, ensure you have created a build.properties file -->
-	<property name="build.properties.file" value="build.properties" />
-	<available file="${build.properties.file}" property="build.properties.file.avalialbe" />
-	<fail unless="build.properties.file.avalialbe" message="${build.properties.file} file not found" />
-	<property file="${build.properties.file}" />
+	<property file="user.properties" />
+	<property file="build.properties" />
 
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
 	<taskdef resource="flexUnitTasks.tasks" classpath="${lib.dir}/flexUnitTasks-4.0.0.jar" />
@@ -18,7 +15,7 @@
 	</target>
 
 	<target name="compile" depends="init" description="Compile SWC">
-		<compc output="${bin.dir}/as3-vanilla.swc">
+		<compc output="${bin.dir}/${project.versionedname}.swc">
 			<source-path path-element="${src.dir}" />
 			<include-sources dir="${src.dir}" includes="*" />
 			<compiler.external-library-path dir="${lib.dir}" append="true">
@@ -31,7 +28,7 @@
 	<target name="test" depends="compile" description="Run unit tests">
 		<mxmlc file="${test-src.dir}/TestRunner.as" output="${bin.dir}/TestRunner.swf">
 			<compiler.library-path dir="${bin.dir}" append="true">
-				<include name="as3-vanilla.swc" />
+				<include name="${project.versionedname}.swc" />
 			</compiler.library-path>
 			<compiler.library-path dir="${lib.dir}" append="true">
 				<include name="*.swc" />
@@ -40,7 +37,8 @@
 		</mxmlc>
 
 		<flexunit swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
-
+		<delete file="${bin.dir}/TestRunner.swf" />
+		
 		<junitreport todir="${report.dir}">
 			<fileset dir="${report.dir}">
 				<include name="TEST-*.xml" />
