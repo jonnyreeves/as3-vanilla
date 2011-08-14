@@ -1,9 +1,10 @@
 package
 {
+	import org.osflash.vanilla.TestExtractTypedArray;
 	import org.flexunit.internals.TraceListener;
 	import org.flexunit.listeners.CIListener;
 	import org.flexunit.runner.FlexUnitCore;
-	import org.osflash.vanilla.TestCoerceToVector;
+	import org.osflash.vanilla.TestExtractVector;
 	import org.osflash.vanilla.TestVanilla;
 	import org.osflash.vanilla.outside.TestExtractMethod;
 
@@ -33,7 +34,8 @@ package
 			core.run([
 				TestVanilla,
 				TestExtractMethod,
-				TestCoerceToVector
+				TestExtractVector,
+				TestExtractTypedArray
 			]);			
 		}
 	}

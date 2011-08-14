@@ -10,7 +10,6 @@ package org.osflash.vanilla
 	import org.osflash.vanilla.testdata.PersonSetterMetadata;
 	import org.osflash.vanilla.testdata.PersonWithAddressConstructor;
 	import org.osflash.vanilla.testdata.PersonWithAddressFields;
-	import org.osflash.vanilla.testdata.PersonWithMultipleAddressesVectorField;
 	
 	/**
 	 * @author Jonny
@@ -32,6 +31,13 @@ package org.osflash.vanilla
 		public function setup() : void
 		{
 			_marshaller = new Vanilla();
+		}
+		
+		[Test]
+		public function noNeedToMarshall() : void {
+			assertEquals("string value", _marshaller.extract("string value", String));
+			assertEquals(42, _marshaller.extract(42, Number));
+			assertEquals(true, _marshaller.extract(true, Boolean));
 		}
 		
 		[Test]
@@ -186,32 +192,6 @@ package org.osflash.vanilla
 			assertNotNull(result.address);
 			assertEquals(source["address"]["address1"], result.address.address1);
 			assertEquals(source["address"]["city"], result.address.city); 
-		}
-		
-		[Test]
-		public function withNestedVector() : void
-		{
-			const source : Object = {
-				name: "Jonny",
-				addresses: [
-					{
-						address1: "Address 1",
-						city: "City 1"
-					},
-					{
-						address1: "Address 2",
-						city: "City 2"
-					}
-				]
-			};
-			
-			const result : PersonWithMultipleAddressesVectorField = _marshaller.extract(source, PersonWithMultipleAddressesVectorField);
-			assertNotNull(result.addresses);
-			assertEquals(2, result.addresses.length);
-			assertEquals(source["addresses"][0]["address1"], result.addresses[0].address1);
-			assertEquals(source["addresses"][0]["city"], result.addresses[0].city);
-			assertEquals(source["addresses"][1]["address1"], result.addresses[1].address1);
-			assertEquals(source["addresses"][1]["city"], result.addresses[1].city);
 		}
 	}
 }

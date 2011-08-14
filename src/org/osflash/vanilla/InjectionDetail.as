@@ -33,7 +33,11 @@ package org.osflash.vanilla
 
 		public function toString() : String
 		{
-			return _fieldName + "<" + type + ">";
+			var result : String = _fieldName + "<" + type + ">";
+			if (arrayTypeHint) {
+				result += "->" + arrayTypeHint;
+			}
+			return result;
 		}
 
 		public function get arrayTypeHint() : Class

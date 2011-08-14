@@ -14,26 +14,37 @@ package org.osflash.vanilla
 	import flash.utils.getQualifiedClassName;
 	
 	/**
-	 * @author Jonny
+	 * @author Jonny Reeves, http://www.jonnyreeves.co.uk
 	 */
 	public class Vanilla
 	{
 		private static const METADATA_TAG : String = "Marshall";
 		private static const METADATA_FIELD_KEY : String = "field";
+		private static const METADATA_TYPE_KEY : String = "type";
 		
-		public function Vanilla() 
-		{
-		}
-		
+		/**
+		 * Attempts to extract properties from the supplied source object into an instance of the supplied targetType.
+		 * 
+		 * @param source		Object which contains properties that you wish to transfer to a new instance of the 
+		 * 						supplied targetType Class.
+		 * @param targetType	The target Class of which an instance will be returned.
+		 * @return				An instance of the supplied targetType containing all the properties extracted from
+		 * 						the supplied source object.
+		 */
 		public function extract(source : Object, targetType : Class) : *
 		{
+			// Catch the case where we've been asked to extract a value which is already of the intended targetType;
+			// this can often happen when Vanilla is recursing, in which case there is nothing to do.
+			if (source is targetType) {
+				return source;
+			}
+			
 			// Construct an InjectionMap which tells us how to inject fields from the source object into 
 			// the Target class.
 			const injectionMap : InjectionMap = new InjectionMap();
 			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
 			
-			trace(injectionMap);
-
+			// Create a new isntance of the targetType; and then inject the values from the source object into it.
 			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
 			injectFields(source, target, injectionMap);
 			injectMethods(source, target, injectionMap);
@@ -41,13 +52,10 @@ package org.osflash.vanilla
 			return target;
 		}
 
-
-
 		private function fetchConstructorArgs(source : Object, constructorFields : Array) : Array
 		{
 			const result : Array = [];
-			for (var i : uint = 0; i < constructorFields.length; i++) 
-			{
+			for (var i : uint = 0; i < constructorFields.length; i++) {
 				result.push(extractValue(source, constructorFields[i]));
 			}
 			return result;
@@ -55,8 +63,7 @@ package org.osflash.vanilla
 
 		private function injectFields(source : Object, target : *, injectionMap : InjectionMap) : void
 		{
-			for each (var injectionDetail : InjectionDetail in injectionMap.getFields())
-			{
+			for each (var injectionDetail : InjectionDetail in injectionMap.getFields()) {
 				target[injectionDetail.name] = extractValue(source, injectionDetail);
 			}
 			
@@ -68,12 +75,9 @@ package org.osflash.vanilla
 			for each (var methodName : String in methodNames)
 			{
 				const values : Array = [];
-				for each (var injectionDetail : InjectionDetail in injectionMap.getMethod(methodName))
-				{
+				for each (var injectionDetail : InjectionDetail in injectionMap.getMethod(methodName)) {
 					values.push(extractValue(source, injectionDetail));
 				}
-				
-				trace("Applying values: " + values + " to method: " + methodName);
 				(target[methodName] as Function).apply(null, values);
 			}
 		}
@@ -89,12 +93,19 @@ package org.osflash.vanilla
 			
 			if (value) 
 			{
-				// automatically coerce types.
+				// automatically coerce simple types.
 				if (!ObjectUtils.isSimple(value)) {
 					value = extract(value, injectionDetail.type);
 				}
-				else if (value is Array && isVector(injectionDetail.type)) {
-					value = coerceToVector(value as Array, injectionDetail.type, injectionDetail.arrayTypeHint);
+				
+				// Collections are harder, we need to coerce the contents.
+				else if (value is Array) {
+					if(isVector(injectionDetail.type)) {
+						value = extractVector(value, injectionDetail.type, injectionDetail.arrayTypeHint);
+					}
+					else if (injectionDetail.arrayTypeHint) {
+						value = extractTypedArray(value, injectionDetail.arrayTypeHint);
+					}					
 				}
 				
 				// refuse to allow any automatic coercing to occur.
@@ -106,11 +117,20 @@ package org.osflash.vanilla
 			return value;
 		}
 
-		private function coerceToVector(array : Array, targetVectorClass : Class, targetClassType : Class) : *
+		private function extractTypedArray(source : Array, targetClassType : Class) : Array
+		{
+			const result : Array = new Array(source.length);
+			for (var i : uint = 0; i < source.length; i++) {
+				result[i] = extract(source[i], targetClassType);
+			}
+			return result;
+		}
+
+		private function extractVector(source : Array, targetVectorClass : Class, targetClassType : Class) : *
 		{
 			const result : * = ClassUtils.newInstance(targetVectorClass);
-			for (var i : uint = 0; i < array.length; i++) {
-				result[i] = extract(array[i], targetClassType);
+			for (var i : uint = 0; i < source.length; i++) {
+				result[i] = extract(source[i], targetClassType);
 			}
 			return result;
 		}
@@ -152,7 +172,9 @@ package org.osflash.vanilla
 		{
 			for each (var field : Field in fields) {
 				if (canAccess(field)) {
-					const arrayTypeHint : Class = extractArrayTypeHint(field.type);
+					const fieldMetadataEntries : Array = field.getMetadata(METADATA_TAG);
+					const fieldMetadata : Metadata = (fieldMetadataEntries) ? fieldMetadataEntries[0] : null;
+					const arrayTypeHint : Class = extractArrayTypeHint(field.type, fieldMetadata);
 					injectionMap.addField(new InjectionDetail(field.name, field.type.clazz, false, arrayTypeHint));
 				}
 			}
@@ -174,18 +196,33 @@ package org.osflash.vanilla
 					var argument : MetadataArgument = metadata.arguments[i];
 					if (argument.key == METADATA_FIELD_KEY) {
 						const param : Parameter = method.parameters[i];
-						const arrayTypeHint : Class = extractArrayTypeHint(param.type);
+						const arrayTypeHint : Class = extractArrayTypeHint(param.type, metadata);
 						injectionMap.addMethod(method.name, new InjectionDetail(argument.value, param.type.clazz, false, arrayTypeHint));
 					}
 				}
 			}
 		}		
 
-		private function extractArrayTypeHint(type : Type) : Class
+		private function extractArrayTypeHint(type : Type, metadata : Metadata = null) : Class
 		{
+			// Vectors carry their own type hint.
 			if (type.parameters && type.parameters[0] is Class) {
 				return type.parameters[0];
 			}
+			
+			// Otherwise we will look for some "type" metadata, if it was defined.
+			else if (metadata) {
+				const numArgs : uint = metadata.arguments.length;
+				for (var i : uint = 0; i < numArgs; i++) {
+					var argument : MetadataArgument = metadata.arguments[i];
+					if (argument.key == METADATA_TYPE_KEY) {
+						const clazz : Class = ClassUtils.forName(argument.value);
+						return clazz;
+					}
+				}
+			}
+			
+			// No type hint.
 			return null;
 		}		
 

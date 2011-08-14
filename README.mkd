@@ -93,6 +93,7 @@ to the constructor arguments of your Model object:
 
 ```actionscript
 package app.model {
+	// Don't forget, constructor metadata is annotated to the class, not the constructor method!
 	[Marshall(field="name", field="age", field="music")]
 	public class PersonModel {
 		private var _name : String;
@@ -154,7 +155,42 @@ trace(result.colours);	// "red","white","blue"
 trace(getQualifiedClassName(result.colours));	// __AS3__.vec::Vector.<String>
 ```
 
-This is particularly useful when coming from a parsed JSON object which doesn't support Vectors.
+If you aren't using Vectors in your project, then you will have to give Vanilla a hand and provide it with a type hint
+as to what the Array is expected to contain, for example:
+
+```actionscript
+// The Target Model Class Definition.
+class app.model {
+	public class Contact {
+		public var name : String;
+		
+		[Marshall (type="app.model.PhoneNumber")]
+		public var phoneNumbers : Array;
+	}
+}
+
+// A DTO which the Contact class makes use of.
+class app.model {
+	public class PhoneNumber {
+		public var number : Number;
+		public var type : String;
+	}
+}
+
+// Let's extract this JSON representation into a instance of the Contact model.
+var source : Object = { 
+	name: "Jonny", 
+	phoneNumbers: [ 
+		{ number: 114752471, type: "home" }, 
+		{ number: 12344122, type: "mobile" } 
+	] 
+};
+
+var result : Contact = extract(source, Contact); 
+trace(result.phoneNumbers); // [object PhoneNumber],[object PhoneNumber]
+trace((result.phoneNumbers[0] as PhoneNumber).type)	// "home".
+```
+
 
 
 Dependencies
