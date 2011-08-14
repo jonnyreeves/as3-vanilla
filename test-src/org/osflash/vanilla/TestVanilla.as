@@ -7,6 +7,7 @@ package org.osflash.vanilla
 	import org.osflash.vanilla.testdata.PersonImplicitFields;
 	import org.osflash.vanilla.testdata.PersonMutlipleArgumentSetterMetadata;
 	import org.osflash.vanilla.testdata.PersonPublicFields;
+	import org.osflash.vanilla.testdata.PersonPublicFieldsMetadata;
 	import org.osflash.vanilla.testdata.PersonSetterMetadata;
 	import org.osflash.vanilla.testdata.PersonWithAddressConstructor;
 	import org.osflash.vanilla.testdata.PersonWithAddressFields;
@@ -156,6 +157,18 @@ package org.osflash.vanilla
 			assertEquals(SOURCE["name"], result.getName());
 			assertEquals(SOURCE["age"], result.getAge());
 			assertEquals(SOURCE["artists"], result.getArtists());
+		}
+		
+		[Test]
+		public function withMetadataFields() : void
+		{
+			const source : Object = {
+				myName: "Dave",
+				myAge: 28
+			};
+			const result : PersonPublicFieldsMetadata = _marshaller.extract(source, PersonPublicFieldsMetadata);
+			assertEquals(source["myName"], result.name);
+			assertEquals(source["myAge"], result.age);
 		}
 		
 		[Test]

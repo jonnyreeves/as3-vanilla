@@ -3,7 +3,7 @@ package org.osflash.vanilla
 	internal class InjectionMap
 	{
 		private var _constructorFields : Array = [];
-		private var _fields : Array = [];
+		private var _fields : Object = {};
 		private var _methods : Object = {};
 
 		public function addConstructorField(injectionDetails : InjectionDetail) : void
@@ -16,14 +16,22 @@ package org.osflash.vanilla
 			return _constructorFields;
 		}
 
-		public function addField(injectionDetails : InjectionDetail) : void
+		public function addField(fieldName : String, injectionDetails : InjectionDetail) : void
 		{
-			_fields.push(injectionDetails);
+			_fields[fieldName] = injectionDetails;
 		}
 		
-		public function getFields() : Array
+		public function getFieldNames() : Array
 		{
-			return _fields;
+			const result : Array = [];
+			for (var fieldName : String in _fields) {
+				result.push(fieldName);
+			}
+			return result;
+		}
+		
+		public function getField(fieldName : String) : InjectionDetail {
+			return _fields[fieldName];
 		}
 
 		public function addMethod(methodName : String, injectionDetails : InjectionDetail) : void

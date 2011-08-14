@@ -63,10 +63,10 @@ package org.osflash.vanilla
 
 		private function injectFields(source : Object, target : *, injectionMap : InjectionMap) : void
 		{
-			for each (var injectionDetail : InjectionDetail in injectionMap.getFields()) {
-				target[injectionDetail.name] = extractValue(source, injectionDetail);
+			const fieldNames : Array = injectionMap.getFieldNames();
+			for each (var fieldName : String in fieldNames) {
+				target[fieldName] = extractValue(source, injectionMap.getField(fieldName));
 			}
-			
 		}
 		
 		private function injectMethods(source : Object, target : *, injectionMap : InjectionMap) : void
@@ -175,7 +175,11 @@ package org.osflash.vanilla
 					const fieldMetadataEntries : Array = field.getMetadata(METADATA_TAG);
 					const fieldMetadata : Metadata = (fieldMetadataEntries) ? fieldMetadataEntries[0] : null;
 					const arrayTypeHint : Class = extractArrayTypeHint(field.type, fieldMetadata);
-					injectionMap.addField(new InjectionDetail(field.name, field.type.clazz, false, arrayTypeHint));
+					const sourceFieldName : String = extractFieldName(field, fieldMetadata);
+					
+					trace("Mapping " + field.name + " => " + sourceFieldName + " on the source object");
+					
+					injectionMap.addField(field.name, new InjectionDetail(sourceFieldName, field.type.clazz, false, arrayTypeHint));
 				}
 			}
 		}
@@ -202,6 +206,23 @@ package org.osflash.vanilla
 				}
 			}
 		}		
+
+		private function extractFieldName(field : Field, metadata : Metadata) : String
+		{
+			// See if a taget fieldName has been defined in the Metadata.
+			if (metadata) {
+				const numArgs : uint = metadata.arguments.length;
+				for (var i : uint = 0; i < numArgs; i++) {
+					var argument : MetadataArgument = metadata.arguments[i];
+					if (argument.key == METADATA_FIELD_KEY) {
+						return argument.value;
+					}
+				}
+			}
+			
+			// Assume it's a 1 to 1 mapping.
+			return field.name;
+		}
 
 		private function extractArrayTypeHint(type : Type, metadata : Metadata = null) : Class
 		{
