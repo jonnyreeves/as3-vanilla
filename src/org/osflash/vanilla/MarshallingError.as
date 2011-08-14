@@ -1,8 +1,5 @@
 package org.osflash.vanilla
 {
-	/**
-	 * @author Jonny
-	 */
 	public class MarshallingError extends Error
 	{
 		public static const TYPE_MISMATCH : uint = 150000;

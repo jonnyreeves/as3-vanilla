@@ -13,9 +13,6 @@ package org.osflash.vanilla
 
 	import flash.utils.getQualifiedClassName;
 	
-	/**
-	 * @author Jonny Reeves, http://www.jonnyreeves.co.uk
-	 */
 	public class Vanilla
 	{
 		private static const METADATA_TAG : String = "Marshall";

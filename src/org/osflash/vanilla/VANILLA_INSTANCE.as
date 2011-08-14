@@ -1,7 +1,7 @@
 package org.osflash.vanilla
 {
 	/**
-	 * @author Jonny
+	 * Global, singleton instance used by the extract() convenience method. 
 	 */
 	internal var VANILLA_INSTANCE : Vanilla = new Vanilla();
 }
