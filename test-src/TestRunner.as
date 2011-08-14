@@ -1,15 +1,15 @@
 package
 {
-	import org.osflash.automashaller.TestCoerceToVector;
-	import org.osflash.automashaller.outside.TestExtractMethod;
-	import flash.events.Event;
-	import flash.display.Stage;
 	import org.flexunit.internals.TraceListener;
+	import org.flexunit.listeners.CIListener;
 	import org.flexunit.runner.FlexUnitCore;
-	import org.fluint.uiImpersonation.VisualTestEnvironmentBuilder;
-	import org.osflash.automashaller.TestAutoMarshaller;
+	import org.osflash.vanilla.TestCoerceToVector;
+	import org.osflash.vanilla.TestVanilla;
+	import org.osflash.vanilla.outside.TestExtractMethod;
 
 	import flash.display.Sprite;
+	import flash.display.Stage;
+	import flash.events.Event;
 	
 	public class TestRunner extends Sprite 
 	{
@@ -26,14 +26,12 @@ package
 		{
 			STAGE = stage;
 
-			//Instantiate the core.
 			core = new FlexUnitCore();
-			
-			//Add any listeners. In this case, the TraceListener has been added to display results.
 			core.addListener(new TraceListener());
+			core.addListener(new CIListener());
 			
 			core.run([
-				TestAutoMarshaller,
+				TestVanilla,
 				TestExtractMethod,
 				TestCoerceToVector
 			]);			

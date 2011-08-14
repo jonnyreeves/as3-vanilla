@@ -1,7 +1,10 @@
 AS3 Vanilla
 ===========
 
-A lightweight library which enables a developer to extract a strongly typed Model Object from a untyped dynamic object without having to write a single line of parsing or marshalling code.  An example use case would be turning data returned from a JSON endpoint into a Model, if you've ever written the following code, then you can benefit from this library:
+A lightweight library which enables a developer to extract a strongly typed Model Object from a untyped dynamic object 
+without having to write a single line of parsing or marshalling code.  An example use case would be turning data 
+returned from a JSON endpoint into a Model, if you've ever written the following code, then you can benefit from this 
+library:
 
 ```actionscript
 // Use a JSON library to convert a JSON String into an AS3 Object.
@@ -16,14 +19,14 @@ myPerson.music = jsonObject["music"];
 trace(myPerson.name) // Jonny.
 ```
 
-Using the AutoMarshaller library, you can turn the above code into this:
+Using the Vanilla library, you can turn the above code into this:
 
 ```actionscript
 // Use a JSON library to convert a JSON String into an AS3 Object.
 var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin","mew"]}');
 
-// Use the AutoMarshaller to convert it into a PersonVO.
-var myPerson : PersonVO = new AutoMarshaller().extract(jsonObject, PersonVO);
+// Use Vanilla to convert it into a PersonVO.
+var myPerson : PersonVO = new Vanilla().extract(jsonObject, PersonVO);
 
 trace(myPerson.name);  // "Jonny"
 ```
@@ -35,7 +38,7 @@ var jsonObject : Object = JSON.decode('{"name":"Jonny", "age": 28, "music":["nin
 var myPerson : PersonVO = extract(jsonObject, PersonVO);
 ```
 
-Got a complex object graph?  Well that's where AutoMarshaller really shines, making light work of parsing and 
+Got a complex object graph?  Well that's where Vanilla really shines, making light work of parsing and 
 marshalling nested objects, for example:
 
 ```actionscript
@@ -62,7 +65,7 @@ var myPerson : PersonVO = extract(jsonObject, PersonVO);
 trace(myPerson.address.city);	// "London"
 ```
 
-Although the AutoMarshaller library does make use of Metadata, it is by no means required - the goal of this library
+Although Vanilla library does make use of Metadata, it is by no means required - the goal of this library
 is to make the marshalling as transparent and painless as possible; if the source Object's fields maps perfectly to
 the fields of your Model object (as in the example above) then everything should 'just work'(tm).
 
@@ -132,7 +135,7 @@ package app.model {
 
 Automatic Coercion
 ------------------
-AutoMarshaller will automatically coerce Arrays found in your source object into Vectors defined in your target Model
+Vanilla will automatically coerce Arrays found in your source object into Vectors defined in your target Model
 Class, take the following example:
 
 ```actionscript
@@ -163,7 +166,6 @@ to produce a single SWC.
 Future Features / Wish List
 ---------------------------
 * The user should be able to define mapping rules without having to use Metadata.
-* Marshalling nested Objects automatically.
 * Caching of the InjectionMap (assuming Class definitions won't change at run time).
 * Java style mutators (eg: `setFoo()`) could be mapped automatically.
 * By using `as3commons-bytecode` we could perform ByteCode reflection to retrieve the names of parameters; this would 
