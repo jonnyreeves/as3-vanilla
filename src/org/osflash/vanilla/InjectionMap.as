@@ -59,7 +59,12 @@ package org.osflash.vanilla
 			var result : String = "[FieldMap ";
 			
 			result += "ctor:{" + _constructorFields +"}, ";
-			result += "fields:{" + _fields + "}, ";
+			
+			result += "fields:{";
+			for (var fieldName : String in _fields) {
+				result += fieldName + "(" + getField(fieldName) + "),";
+			}
+			result += "}";
 			
 			result += "methods:{";
 			for (var methodName : String in _methods) {

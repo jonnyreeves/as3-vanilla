@@ -1,15 +1,14 @@
 package org.osflash.vanilla
 {
+	import org.osflash.vanilla.reflection.impl.AS3CommonsReflectionMapFactory;
 	import org.as3commons.lang.ClassUtils;
 	import org.as3commons.lang.ObjectUtils;
-	import org.as3commons.reflect.Accessor;
-	import org.as3commons.reflect.Field;
-	import org.as3commons.reflect.Metadata;
-	import org.as3commons.reflect.MetadataArgument;
-	import org.as3commons.reflect.Method;
-	import org.as3commons.reflect.Parameter;
-	import org.as3commons.reflect.Type;
-	import org.as3commons.reflect.Variable;
+	import org.osflash.vanilla.reflection.Field;
+	import org.osflash.vanilla.reflection.IReflectionMapFactory;
+	import org.osflash.vanilla.reflection.MetadataArgument;
+	import org.osflash.vanilla.reflection.Method;
+	import org.osflash.vanilla.reflection.Parameter;
+	import org.osflash.vanilla.reflection.ReflectionMap;
 
 	import flash.utils.getQualifiedClassName;
 	
@@ -18,6 +17,13 @@ package org.osflash.vanilla
 		private static const METADATA_TAG : String = "Marshall";
 		private static const METADATA_FIELD_KEY : String = "field";
 		private static const METADATA_TYPE_KEY : String = "type";
+		
+		private var _reflector : IReflectionMapFactory;
+		
+		public function Vanilla(reflector : IReflectionMapFactory = null) 
+		{
+			_reflector = reflector || new AS3CommonsReflectionMapFactory();
+		}
 		
 		/**
 		 * Attempts to extract properties from the supplied source object into an instance of the supplied targetType.
@@ -39,7 +45,7 @@ package org.osflash.vanilla
 			// Construct an InjectionMap which tells us how to inject fields from the source object into 
 			// the Target class.
 			const injectionMap : InjectionMap = new InjectionMap();
-			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
+			addReflectedRules(injectionMap, targetType, _reflector.create(targetType));
 			
 			// Create a new isntance of the targetType; and then inject the values from the source object into it
 			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
@@ -107,7 +113,7 @@ package org.osflash.vanilla
 				
 				// refuse to allow any automatic coercing to occur.
 				if (!(value is injectionDetail.type)) {
-					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + Type.forInstance(value).clazz + "]>) from source object to " + injectionDetail.type + " on target object", MarshallingError.TYPE_MISMATCH);
+					throw new MarshallingError("Could not coerce `" + injectionDetail.name + "` (value: " + value + " <" + getQualifiedClassName(value) + "]>) from source object to " + injectionDetail.type + " on target object", MarshallingError.TYPE_MISMATCH);
 				}
 			}
 			
@@ -138,79 +144,67 @@ package org.osflash.vanilla
 			return ClassUtils.newInstance(targetType, ctorArgs);
 		}
 
-		private function addReflectedRules(injectionMap : InjectionMap, targetType : Class, reflectionMap : Type) : void
+		private function addReflectedRules(injectionMap : InjectionMap, targetType : Class, reflectionMap : ReflectionMap) : void
 		{
 			addReflectedConstructorRules(injectionMap, reflectionMap);
 			addReflectedFieldRules(injectionMap, reflectionMap.fields);
 			addReflectedSetterRules(injectionMap, reflectionMap.methods);
 		}
 
-		private function addReflectedConstructorRules(injectionMap : InjectionMap, reflectionMap : Type) : void
+		private function addReflectedConstructorRules(injectionMap : InjectionMap, reflectionMap : ReflectionMap) : void
 		{
-			const clazzMarshallingMetadata : Array = reflectionMap.getMetadata(METADATA_TAG);
-			if (!clazzMarshallingMetadata) {
-				return;
-			}
-			
-			const marshallingMetadata : Metadata = clazzMarshallingMetadata[0];
-			const numArgs : uint = marshallingMetadata.arguments.length;
+			const metadataArgs : Vector.<MetadataArgument> = reflectionMap.ctor.getMetadataArguments(METADATA_TAG);
+			const numArgs : uint = metadataArgs.length;
 			
 			for (var i : uint = 0; i < numArgs; i++) {
-				var argument : MetadataArgument = marshallingMetadata.arguments[i];
-				if (argument.key == METADATA_FIELD_KEY) {
-					const param : Parameter = reflectionMap.constructor.parameters[i];
-					const arrayTypeHint : Class = extractArrayTypeHint(param.type);
-					injectionMap.addConstructorField(new InjectionDetail(argument.value, param.type.clazz, true, arrayTypeHint));
+				if (metadataArgs[i].key == METADATA_FIELD_KEY) {
+					const param : Parameter = reflectionMap.ctor.parameters[i];
+					const arrayTypeHint : Class = extractArrayTypeHint(param);		// No typeHint metadata on ctors, yet.
+					injectionMap.addConstructorField(new InjectionDetail(metadataArgs[i].value, param.type, true, arrayTypeHint));
 				}
 			}
 		}
 
-		private function addReflectedFieldRules(injectionMap : InjectionMap, fields : Array) : void
+		private function addReflectedFieldRules(injectionMap : InjectionMap, fields : Vector.<Field>) : void
 		{
 			for each (var field : Field in fields) {
-				if (canAccess(field)) {
-					const fieldMetadataEntries : Array = field.getMetadata(METADATA_TAG);
-					const fieldMetadata : Metadata = (fieldMetadataEntries) ? fieldMetadataEntries[0] : null;
-					const arrayTypeHint : Class = extractArrayTypeHint(field.type, fieldMetadata);
-					const sourceFieldName : String = extractFieldName(field, fieldMetadata);
-					
-					injectionMap.addField(field.name, new InjectionDetail(sourceFieldName, field.type.clazz, false, arrayTypeHint));
-				}
+				const fieldMetadataEntries : Vector.<MetadataArgument> = field.getMetadataArguments(METADATA_TAG);
+				const arrayTypeHint : Class = extractArrayTypeHint(field, fieldMetadataEntries);
+				const sourceFieldName : String = extractFieldName(field, fieldMetadataEntries);
+				
+				injectionMap.addField(field.name, new InjectionDetail(sourceFieldName, field.type, false, arrayTypeHint));
 			}
 		}
 
-		private function addReflectedSetterRules(injectionMap : InjectionMap, methods : Array) : void
+		private function addReflectedSetterRules(injectionMap : InjectionMap, methods : Vector.<Method>) : void
 		{
 			for each (var method : Method in methods) {
 
-				const methodMarshallingMetadata : Array = method.getMetadata(METADATA_TAG);
-				if (methodMarshallingMetadata == null) {
+				const metadataArgs : Vector.<MetadataArgument> = method.getMetadataArguments(Vanilla.METADATA_TAG);
+				if (metadataArgs == null) {
 					continue;
 				}
 				
-				const metadata : Metadata = methodMarshallingMetadata[0];
-				const numArgs : uint = metadata.arguments.length;
-				
+				const numArgs : uint = metadataArgs.length;
 				for (var i : uint = 0; i < numArgs; i++) {
-					var argument : MetadataArgument = metadata.arguments[i];
-					if (argument.key == METADATA_FIELD_KEY) {
+					if (metadataArgs[i].key == METADATA_FIELD_KEY) {
 						const param : Parameter = method.parameters[i];
-						const arrayTypeHint : Class = extractArrayTypeHint(param.type, metadata);
-						injectionMap.addMethod(method.name, new InjectionDetail(argument.value, param.type.clazz, false, arrayTypeHint));
+						// FIXME If a method has multiple type hints we will always use the first!
+						const arrayTypeHint : Class = extractArrayTypeHint(param, metadataArgs);
+						injectionMap.addMethod(method.name, new InjectionDetail(metadataArgs[i].value, param.type, false, arrayTypeHint));
 					}
 				}
 			}
 		}		
 
-		private function extractFieldName(field : Field, metadata : Metadata) : String
+		private function extractFieldName(field : Field, metadataArgs : Vector.<MetadataArgument>) : String
 		{
 			// See if a taget fieldName has been defined in the Metadata.
-			if (metadata) {
-				const numArgs : uint = metadata.arguments.length;
+			if (metadataArgs) {
+				const numArgs : uint = metadataArgs.length;
 				for (var i : uint = 0; i < numArgs; i++) {
-					var argument : MetadataArgument = metadata.arguments[i];
-					if (argument.key == METADATA_FIELD_KEY) {
-						return argument.value;
+					if (metadataArgs[i].key == METADATA_FIELD_KEY) {
+						return metadataArgs[i].value;
 					}
 				}
 			}
@@ -219,21 +213,19 @@ package org.osflash.vanilla
 			return field.name;
 		}
 
-		private function extractArrayTypeHint(type : Type, metadata : Metadata = null) : Class
+		private function extractArrayTypeHint(parameter : Parameter, metadataArgs : Vector.<MetadataArgument> = null) : Class
 		{
 			// Vectors carry their own type hint.
-			if (type.parameters && type.parameters[0] is Class) {
-				return type.parameters[0];
+			if (parameter.vectorType) {
+				return parameter.vectorType;
 			}
 			
 			// Otherwise we will look for some "type" metadata, if it was defined.
-			else if (metadata) {
-				const numArgs : uint = metadata.arguments.length;
+			else if (metadataArgs) {
+				const numArgs : uint = metadataArgs.length;
 				for (var i : uint = 0; i < numArgs; i++) {
-					var argument : MetadataArgument = metadata.arguments[i];
-					if (argument.key == METADATA_TYPE_KEY) {
-						const clazz : Class = ClassUtils.forName(argument.value);
-						return clazz;
+					if (metadataArgs[i].key == METADATA_TYPE_KEY) {
+						return ClassUtils.forName(metadataArgs[i].value);
 					}
 				}
 			}
@@ -242,17 +234,6 @@ package org.osflash.vanilla
 			return null;
 		}		
 
-		private function canAccess(field : Field) : Boolean
-		{
-			if (field is Variable) {
-				return true;
-			}
-			else if (field is Accessor) {
-				return (field as Accessor).writeable;
-			}
-			return false;
-		}
-		
 		private function isVector(obj : *) : Boolean 
 		{
     		return (getQualifiedClassName(obj).indexOf('__AS3__.vec::Vector') == 0);
