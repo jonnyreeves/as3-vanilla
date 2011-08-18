@@ -26,7 +26,7 @@
 	</target>
 
 	<target name="test" depends="compile" description="Run unit tests">
-		<mxmlc file="${test-src.dir}/TestRunner.as" output="${bin.dir}/TestRunner.swf">
+		<mxmlc file="${test-src.dir}/TestRunner.as" output="${bin.dir}/TestRunner.swf" verbose-stacktraces="true">
 			<compiler.library-path dir="${bin.dir}" append="true">
 				<include name="${project.versionedname}.swc" />
 			</compiler.library-path>
