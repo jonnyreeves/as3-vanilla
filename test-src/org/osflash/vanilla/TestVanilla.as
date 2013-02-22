@@ -2,6 +2,7 @@ package org.osflash.vanilla
 {
 	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertNotNull;
+	import org.flexunit.asserts.assertNull;
 	import org.flexunit.asserts.assertTrue;
 	import org.osflash.vanilla.testdata.PersonConstructorMetadata;
 	import org.osflash.vanilla.testdata.PersonImplicitFields;
@@ -9,7 +10,8 @@ package org.osflash.vanilla
 	import org.osflash.vanilla.testdata.PersonPublicFields;
 	import org.osflash.vanilla.testdata.PersonPublicFieldsMetadata;
 	import org.osflash.vanilla.testdata.PersonSetterMetadata;
-	import org.osflash.vanilla.testdata.PersonWithAddressConstructor;
+import org.osflash.vanilla.testdata.PersonTransientFields;
+import org.osflash.vanilla.testdata.PersonWithAddressConstructor;
 	import org.osflash.vanilla.testdata.PersonWithAddressFields;
 	
 	/**
@@ -206,5 +208,14 @@ package org.osflash.vanilla
 			assertEquals(source["address"]["address1"], result.address.address1);
 			assertEquals(source["address"]["city"], result.address.city); 
 		}
+
+        [Test (description="Marshalling ignores Transient variables")]
+        public function transientVariablesAreIgnored() : void
+        {
+            const source : Object = { name: "dave", age:22 };
+            const result : PersonTransientFields = _marshaller.extract(source, PersonTransientFields);
+            assertNull(result.name);
+            assertEquals(22, result.age);
+        }
 	}
 }
