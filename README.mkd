@@ -135,6 +135,23 @@ package app.model {
 ```
 
 
+Ignoring fields
+-----------------------------
+You can ignore fields by using [Transient] metadata:
+
+```actionscript
+package app.model {
+	public class PersonModel {
+        [Transient]
+		public var name : String;
+		public var age : uint;
+    }
+}
+```
+The name field is ignored from the mapping but the age is not.
+Added by Eamonn Faherty - http://eamonnfaherty.co.uk
+
+
 Automatic Coercion
 ------------------
 Vanilla will automatically coerce Arrays found in your source object into Vectors defined in your target Model
