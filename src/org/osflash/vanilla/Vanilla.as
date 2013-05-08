@@ -127,7 +127,12 @@ package org.osflash.vanilla
 		{
 			const result : * = ClassUtils.newInstance(targetVectorClass);
 			for (var i : uint = 0; i < source.length; i++) {
-				result[i] = extract(source[i], targetClassType);
+				if (isVector(targetClassType)) {
+					const type : Type = Type.forClass(targetClassType);
+					result[i] = extractVector(source[i], targetClassType, type.parameters[0]);
+				} else {
+					result[i] = extract(source[i], targetClassType);
+				}
 			}
 			return result;
 		}
