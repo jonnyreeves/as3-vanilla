@@ -1,6 +1,5 @@
 package
 {
-	import org.osflash.vanilla.TestExtractComplexVector;
 	import org.osflash.vanilla.TestExtractTypedArray;
 	import org.flexunit.internals.TraceListener;
 	import org.flexunit.listeners.CIListener;
@@ -36,8 +35,7 @@ package
 				TestVanilla,
 				TestExtractMethod,
 				TestExtractVector,
-				TestExtractTypedArray,
-				TestExtractComplexVector
+				TestExtractTypedArray
 			]);			
 		}
 	}

@@ -5,14 +5,11 @@ package org.osflash.vanilla
 	import org.flexunit.asserts.assertTrue;
 	import org.osflash.vanilla.testdata.Address;
 	import org.osflash.vanilla.testdata.NumberVectorList;
+	import org.osflash.vanilla.testdata.NestedNumberVectorList;
+	import org.osflash.vanilla.testdata.NestedComplexVectorList;
 	import org.osflash.vanilla.testdata.PersonWithMultipleAddressesVectorField;
 	import org.osflash.vanilla.testdata.StringVectorList;
-	
-	/**
-	 * Test cases which ensure that Vanilla is capable of extracting values to Vectors. 
-	 * 
-	 * @author Jonny
-	 */
+
 	public class TestExtractVector
 	{
 		[Test]
@@ -66,6 +63,59 @@ package org.osflash.vanilla
 			assertEquals(source["addresses"][0]["city"], result.addresses[0].city);
 			assertEquals(source["addresses"][1]["address1"], result.addresses[1].address1);
 			assertEquals(source["addresses"][1]["city"], result.addresses[1].city);
+		}
+
+		[Test]
+		public function nested_numbers() : void
+		{
+			const source : Object = {
+				numbers: [
+					[1, 2],
+					[4, 5],
+					[7, 8, 9]
+				]
+			};
+
+			const result : NestedNumberVectorList = extract(source, NestedNumberVectorList);
+			assertEquals(3, result.numbers.length);
+
+			assertEquals(1, result.numbers[0][0]);
+			assertEquals(2, result.numbers[0][1]);
+			assertEquals(4, result.numbers[1][0]);
+			assertEquals(5, result.numbers[1][1]);
+			assertEquals(7, result.numbers[2][0]);
+			assertEquals(8, result.numbers[2][1]);
+			assertEquals(9, result.numbers[2][2]);
+		}
+
+		[Test]
+		public function nested_complex() : void
+		{
+			const source : Object = {
+				people: [
+					[
+						{
+							name: "jonny",
+							age: 28,
+							artists: [ "mew", "tool" ]
+						},
+						{
+							name: "mayakwd",
+							age: 26,
+							address: {
+								adress1: "Somewhere",
+								city: "Tomsk"
+							}
+						}
+					]
+				]
+			};
+
+			const result: NestedComplexVectorList = extract(source, NestedComplexVectorList);
+
+			assertEquals("jonny", result.people[0][0].name);
+			assertEquals("Tomsk", result.people[0][1].address.city);
+
 		}
 	}
 }
