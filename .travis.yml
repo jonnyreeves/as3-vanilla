@@ -19,5 +19,7 @@ before_script:
 
   - export PATH="Flash Player Debugger.app/Contents/MacOS":$PATH
 
+script: ant test
+
   # FLex-Mojo is expecting the "Flash Player" command so copy "Flash Player Debug" to "Flash Player"
   # - cp Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player\ Debugger Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player
