@@ -4,6 +4,7 @@
 	<property file="user.properties" />
 	<property file="build.properties" />
 
+	<echo message="Using FLEX_HOME: ${FLEX_HOME}"/>
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
 	<taskdef resource="flexUnitTasks.tasks" classpath="${lib.dir}/flexUnitTasks-4.0.0.jar" />
 
