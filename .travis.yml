@@ -6,12 +6,12 @@ before_script:
   - export "JAVA_HOME=`/usr/libexec/java_home`"
 
   # Grab Flex SDK
-  - curl -L http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6a.zip >> flex_sdk.zip
+  - curl -L http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6a.zip > flex_sdk.zip
   - unzip flex_sdk.zip -d ./flex_sdk
   - export "FLEX_HOME=`pwd`/flex_sdk"
 
   # Grab the Flash Player download script.
-  - sh curl -L https://raw.githubusercontent.com/Larusso/travis-CI-actionscript-demo/master/getFpFromArchive.sh >> getFpFromArchive.sh
+  - curl -L https://raw.githubusercontent.com/Larusso/travis-CI-actionscript-demo/master/getFpFromArchive.sh > getFpFromArchive.sh
 
   # Download and install a specific Flash Player from the Adobe Archives:
   # http://helpx.adobe.com/flash-player/kb/archived-flash-player-versions.html
@@ -20,4 +20,4 @@ before_script:
   - export PATH="Flash Player Debugger.app/Contents/MacOS":$PATH
 
   # FLex-Mojo is expecting the "Flash Player" command so copy "Flash Player Debug" to "Flash Player"
-  - cp Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player\ Debugger Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player
+  # - cp Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player\ Debugger Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player
