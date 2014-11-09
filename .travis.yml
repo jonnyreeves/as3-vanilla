@@ -1,0 +1,18 @@
+# required to get an OSX environment
+language: objective-c
+
+before_script:
+  # set the JAVA_HOME which is not set by default for OSX Travis-CI workers
+  - export "JAVA_HOME=`/usr/libexec/java_home`"
+
+  # Grab Flex SDK
+  - sh curl -L http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6a.zip >> flex_sdk.zip
+  - unzip flex_sdk.zip -d ./flex_sdk
+  - export "FLEX_HOME=`pwd`/flex_sdk
+
+  # Grab the Flash Player download script.
+  - sh curl -L https://raw.githubusercontent.com/Larusso/travis-CI-actionscript-demo/master/getFpFromArchive.sh >> getFpFromArchive.sh
+
+  # Download and install a specific Flash Player from the Adobe Archives:
+  # http://helpx.adobe.com/flash-player/kb/archived-flash-player-versions.html
+  - sh getFpFromArchive.sh 'http://download.macromedia.com/pub/flashplayer/installers/archive/fp_11.7.700.225_archive.zip'
