@@ -8,7 +8,7 @@ before_script:
   # Grab Flex SDK
   - curl -L http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6a.zip >> flex_sdk.zip
   - unzip flex_sdk.zip -d ./flex_sdk
-  - export "FLEX_HOME=`pwd`/flex_sdk
+  - export "FLEX_HOME=`pwd`/flex_sdk"
 
   # Grab the Flash Player download script.
   - sh curl -L https://raw.githubusercontent.com/Larusso/travis-CI-actionscript-demo/master/getFpFromArchive.sh >> getFpFromArchive.sh
