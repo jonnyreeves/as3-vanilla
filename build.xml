@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="as3-vanilla">
 
+    <property environment="env" />
 	<property file="user.properties" />
 	<property file="build.properties" />
 
