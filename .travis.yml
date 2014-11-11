@@ -20,6 +20,8 @@ before_script:
   - sh getFpFromArchive.sh 'http://download.macromedia.com/pub/flashplayer/installers/archive/fp_11.7.700.225_archive.zip'
   - export PATH="`pwd`/Flash Player Debugger.app/Contents/MacOS":$PATH
 
+  - /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -v -f `pwd`/Flash Player Debugger.app
+
 script: ant test
 
   # FLex-Mojo is expecting the "Flash Player" command so copy "Flash Player Debug" to "Flash Player"
