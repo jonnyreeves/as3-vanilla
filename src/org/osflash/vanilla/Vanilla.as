@@ -1,5 +1,6 @@
 package org.osflash.vanilla
 {
+	import flash.utils.Dictionary;
 	import org.as3commons.lang.ClassUtils;
 	import org.as3commons.lang.ObjectUtils;
 	import org.as3commons.reflect.Accessor;
@@ -19,6 +20,9 @@ package org.osflash.vanilla
 		private static const METADATA_FIELD_KEY : String = "field";
 		private static const METADATA_TYPE_KEY : String = "type";
 		
+		//Cache InjectionMap instances
+		private var injectionMapCache : Dictionary = new Dictionary();
+		
 		/**
 		 * Attempts to extract properties from the supplied source object into an instance of the supplied targetType.
 		 * 
@@ -36,12 +40,15 @@ package org.osflash.vanilla
 				return source;
 			}
 			
-			// Construct an InjectionMap which tells us how to inject fields from the source object into 
-			// the Target class.
-			const injectionMap : InjectionMap = new InjectionMap();
-			addReflectedRules(injectionMap, targetType, Type.forClass(targetType));
+			if (!injectionMapCache[targetType]) 
+			{
+			    injectionMapCache[targetType] = new InjectionMap();
+			    addReflectedRules(injectionMapCache[targetType], targetType, Type.forClass(targetType));
+			}
 			
-			// Create a new isntance of the targetType; and then inject the values from the source object into it
+			const injectionMap : InjectionMap = injectionMapCache[targetType];
+			
+			// Create a new instance of the targetType; and then inject the values from the source object into it
 			const target : * = instantiate(targetType, fetchConstructorArgs(source, injectionMap.getConstructorFields()));
 			injectFields(source, target, injectionMap);
 			injectMethods(source, target, injectionMap);
