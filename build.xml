@@ -5,11 +5,11 @@
 	<property file="user.properties" />
 	<property file="build.properties" />
 
-	<echo message="Using FLEX_HOME: ${FLEX_HOME}"/>
 	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
-	<taskdef resource="flexUnitTasks.tasks" classpath="${lib.dir}/flexUnitTasks-4.0.0.jar" />
+	<taskdef resource="flexUnitTasks.tasks" classpath="${lib.dir}/flexunit/flexUnitTasks-4.2.0-20140410.jar" />
 
 	<target name="init">
+		<echo message="Using FLEX_HOME: ${FLEX_HOME}"/>
 		<delete dir="${bin.dir}" />
 		<delete dir="${report.dir}" />
 		<mkdir dir="${bin.dir}" />
@@ -34,11 +34,12 @@
 			</compiler.library-path>
 			<compiler.library-path dir="${lib.dir}" append="true">
 				<include name="*.swc" />
+				<include name="flexunit/*.swc" />
 			</compiler.library-path>
 			<static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
 		</mxmlc>
 
-		<flexunit swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
+		<antcall target="run-flexunit" />
 		<delete file="${bin.dir}/TestRunner.swf" />
 		
 		<junitreport todir="${report.dir}">
@@ -50,7 +51,20 @@
 
 		<fail if="tests.failed" />
 	</target>
-	
+
+	<target name="run-flexunit">
+		<antcall target="run-flexunit-with-player"/>
+		<antcall target="run-flexunit-without-player"/>
+	</target>
+
+	<target name="run-flexunit-with-player" if="FLASH_PLAYER_CMD">
+		<flexunit command="${FLASH_PLAYER_CMD}" swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
+	</target>
+
+	<target name="run-flexunit-without-player" unless="FLASH_PLAYER_CMD">
+		<flexunit swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
+	</target>
+
 	<target name="package" depends="test" description="Package the project for distribution">
 		<delete dir="${dist.dir}" />
 		<mkdir dir="${dist.dir}" />

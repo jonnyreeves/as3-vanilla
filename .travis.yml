@@ -18,11 +18,9 @@ before_script:
   # http://helpx.adobe.com/flash-player/kb/archived-flash-player-versions.html
   - curl -L https://raw.githubusercontent.com/Larusso/travis-CI-actionscript-demo/master/getFpFromArchive.sh > getFpFromArchive.sh
   - sh getFpFromArchive.sh 'http://download.macromedia.com/pub/flashplayer/installers/archive/fp_11.7.700.225_archive.zip'
-  - export PATH="`pwd`/Flash\ Player\ Debugger.app/Contents/MacOS":$PATH
+  - ls -l `pwd`/Flash\ Player\ Debugger.app/Contents/MacOS
+  - export FLASH_CMD="`pwd`/Flash\ Player\ Debugger.app/Contents/MacOS"
 
-  - /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -v -f `pwd`/Flash\ Player\ Debugger.app
+  #- /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -v -f `pwd`/Flash\ Player\ Debugger.app
 
-script: ant test
-
-  # FLex-Mojo is expecting the "Flash Player" command so copy "Flash Player Debug" to "Flash Player"
-  # - cp Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player\ Debugger Flash\ Player\ Debugger.app/Contents/MacOS/Flash\ Player
+script: ant test -DFLASH_PLAYER_CMD="${FLASH_CMD}"
