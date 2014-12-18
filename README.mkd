@@ -1,6 +1,8 @@
 AS3 Vanilla
 ===========
 
+[![Build Status](https://travis-ci.org/jonnyreeves/as3-vanilla.svg?branch=master)](https://travis-ci.org/jonnyreeves/as3-vanilla)
+
 Download v0.1.3 Release Archive: [as3-vanilla-0.1.3.zip](https://dl.dropbox.com/u/4551551/github/as3-vanilla/as3-vanilla-0.1.3.zip)
 
 A lightweight library which enables a developer to extract a strongly typed Model Object from a untyped dynamic object 
