@@ -20,6 +20,4 @@ before_script:
   - sh getFpFromArchive.sh 'http://download.macromedia.com/pub/flashplayer/installers/archive/fp_11.7.700.225_archive.zip'
   - export FLASH_CMD="`pwd`/Flash Player Debugger.app/Contents/MacOS/Flash Player Debugger"
 
-  #- /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -v -f `pwd`/Flash\ Player\ Debugger.app
-
 script: ant test -DFLASH_PLAYER_CMD="${FLASH_CMD}"

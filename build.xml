@@ -10,6 +10,7 @@
 
 	<target name="init">
 		<echo message="Using FLEX_HOME: ${FLEX_HOME}"/>
+
 		<delete dir="${bin.dir}" />
 		<delete dir="${report.dir}" />
 		<mkdir dir="${bin.dir}" />
@@ -53,15 +54,20 @@
 	</target>
 
 	<target name="run-flexunit">
+		<!-- Decide how we want to start flexunit -->
 		<antcall target="run-flexunit-with-player"/>
 		<antcall target="run-flexunit-without-player"/>
 	</target>
 
 	<target name="run-flexunit-with-player" if="FLASH_PLAYER_CMD">
+		<!-- Used the supplied flash player path, set via -DFLASH_PLAYER_CMD="$path",
+		     mainly just for Travis CI -->
 		<flexunit command="${FLASH_PLAYER_CMD}" swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
 	</target>
 
 	<target name="run-flexunit-without-player" unless="FLASH_PLAYER_CMD">
+		<!-- If no command is supplied, flexunit will open flash player using the system's
+		     default mechanism; however this will fail under Travis CI -->
 		<flexunit swf="${bin.dir}/TestRunner.swf" toDir="${report.dir}" haltonfailure="false" failureproperty="tests.failed" timeout="10000" localtrusted="true" />
 	</target>
 
@@ -71,7 +77,7 @@
 		
 		<zip destfile="${dist.dir}/${project.versionedname}.zip">
 			<zipfileset dir="${bin.dir}" includes="${project.versionedname}.swc" prefix="bin" />
-			<zipfileset dir="${lib.dir}" excludes="flexunit*" prefix="libs" />
+			<zipfileset dir="${lib.dir}" excludes="**/flexunit/**" prefix="libs" />
 			<zipfileset dir="${basedir}" includes="README.mkd" />
 		</zip>
 	</target>
