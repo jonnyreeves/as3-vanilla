@@ -3,8 +3,6 @@ AS3 Vanilla
 
 [![Build Status](https://travis-ci.org/jonnyreeves/as3-vanilla.svg?branch=master)](https://travis-ci.org/jonnyreeves/as3-vanilla)
 
-Download v0.1.3 Release Archive: [as3-vanilla-0.1.3.zip](https://dl.dropbox.com/u/4551551/github/as3-vanilla/as3-vanilla-0.1.3.zip)
-
 A lightweight library which enables a developer to extract a strongly typed Model Object from a untyped dynamic object 
 without having to write a single line of parsing or marshalling code.  An example use case would be turning data 
 returned from a JSON endpoint into a Model, if you've ever written the following code, then you can benefit from this 
@@ -226,7 +224,6 @@ the following SWCs to your project's libs folder.
 Future Features / Wish List
 ---------------------------
 * The user should be able to define mapping rules without having to use Metadata.
-* Caching of the InjectionMap (assuming Class definitions won't change at run time).
 * Java style mutators (eg: `setFoo()`) could be mapped automatically.
 * By using `as3commons-bytecode` we could perform ByteCode reflection to retrieve the names of parameters; this would 
 would remove the need for constructor marshalling metadata.
